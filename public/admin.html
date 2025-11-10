@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - PlebOne</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">PLEBONE</a>
+            <div class="nav-links">
+                <a href="/about.html" class="nav-link">ABOUT</a>
+                <a href="/projects.html" class="nav-link">PROJECTS</a>
+                <a href="/blog.html" class="nav-link">BLOG</a>
+                <a href="/donations.html" class="nav-link">DONATIONS</a>
+                <a href="/admin.html" class="nav-link nav-admin active">ADMIN</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Login Section -->
+        <section id="login-section" class="content">
+            <h1 class="page-title">ADMIN ACCESS</h1>
+            <div class="text-section">
+                <p>Authentication required. Please sign in with your Nostr key using a NIP-07 browser extension (e.g., nos2x, Alby).</p>
+                <button id="login-btn" class="btn">SIGN IN WITH NOSTR</button>
+                <p id="login-status" class="text-muted" style="margin-top: 1rem;"></p>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard -->
+        <section id="admin-section" class="content" style="display: none; max-width: 1000px;">
+            <div class="admin-header">
+                <h1 class="page-title">ADMIN DASHBOARD</h1>
+                <div class="admin-actions">
+                    <span id="admin-pubkey" class="text-muted"></span>
+                    <button id="logout-btn" class="btn btn-secondary">LOGOUT</button>
+                </div>
+            </div>
+
+            <!-- Blog Posts Management -->
+            <div class="text-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>BLOG POSTS</h2>
+                    <button id="new-post-btn" class="btn">NEW POST</button>
+                </div>
+                <div id="posts-list" class="admin-list">
+                    <p class="loading">Loading posts...</p>
+                </div>
+            </div>
+
+            <!-- Projects Management -->
+            <div class="text-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>PROJECTS</h2>
+                    <button id="new-project-btn" class="btn">NEW PROJECT</button>
+                </div>
+                <div id="admin-projects-list" class="admin-list">
+                    <p class="loading">Loading projects...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Blog Post Modal -->
+    <div id="post-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="post-modal-title">NEW POST</h2>
+                <button class="modal-close" id="close-post-modal">&times;</button>
+            </div>
+            <form id="post-form">
+                <div class="form-group">
+                    <label class="form-label">TITLE</label>
+                    <input type="text" id="post-title" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">TAGS (comma-separated)</label>
+                    <input type="text" id="post-tags" class="form-input" placeholder="nostr, tutorial, freedom-tech">
+                    <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.8rem;">Enter tags separated by commas</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CONTENT (Markdown)</label>
+                    <textarea id="post-content" class="form-textarea" rows="15" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="post-published" class="form-checkbox">
+                        <span class="form-label" style="display: inline;">PUBLISHED</span>
+                    </label>
+                </div>
+                <div class="admin-actions">
+                    <button type="submit" class="btn">SAVE</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-post-btn">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="project-modal-title">NEW PROJECT</h2>
+                <button class="modal-close" id="close-project-modal">&times;</button>
+            </div>
+            <form id="project-form">
+                <div class="form-group">
+                    <label class="form-label">NAME</label>
+                    <input type="text" id="project-name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">DESCRIPTION</label>
+                    <textarea id="project-description" class="form-textarea" rows="5" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">URL (optional)</label>
+                    <input type="url" id="project-url" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">REPOSITORY (optional)</label>
+                    <input type="url" id="project-repository" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="project-active" class="form-checkbox" checked>
+                        <span class="form-label" style="display: inline;">ACTIVE</span>
+                    </label>
+                </div>
+                <div class="admin-actions">
+                    <button type="submit" class="btn">SAVE</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-project-btn">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>PLEBONE - A spin-off from <a href="https://11b.dev" target="_blank" style="color: inherit; text-decoration: underline;">11b.Dev</a> | Open Source | Freedom Tech</p>
+    </footer>
+
+    <script type="module" src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: docker.io/library/postgres:16-alpine
+    container_name: plebone-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: plebone
+      POSTGRES_PASSWORD: plebone_dev_password
+      POSTGRES_DB: plebone
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plebone"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PlebOne Application (Development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: plebone-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=plebone
+      - DB_PASSWORD=plebone_dev_password
+      - DB_DATABASE=plebone
+      - PORT=3000
+      - ADMIN_PUBKEYS=${ADMIN_PUBKEYS:-}
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "sleep 5 && npm run start:dev"
+
+volumes:
+  postgres_data:
