@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsHexadecimal, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsHexadecimal, MaxLength, IsBoolean } from 'class-validator';
 import { TaskType, TaskStatus } from './project-task.entity';
 
 export class CreateProjectTaskDto {
@@ -26,6 +26,14 @@ export class UpdateProjectTaskDto {
   @IsEnum(TaskStatus)
   @IsOptional()
   status?: TaskStatus;
+
+  @IsBoolean()
+  @IsOptional()
+  priority?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  ignored?: boolean;
 
   @IsString()
   @MaxLength(2000)

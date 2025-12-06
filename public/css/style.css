@@ -1155,9 +1155,41 @@ a:hover {
     margin-bottom: 2.5rem;
 }
 
+.submit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.submit-header:hover {
+    opacity: 0.8;
+}
+
+.toggle-icon {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+.submit-form-container {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 0.5rem;
+}
+
+.submit-form-container.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+}
+
 .submit-task-section h2 {
     font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
     color: var(--text-primary);
 }
 
@@ -1259,7 +1291,7 @@ a:hover {
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     padding: 1.25rem;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .task-item:hover {
@@ -1274,11 +1306,91 @@ a:hover {
     opacity: 0.5;
 }
 
+/* Priority task styling */
+.task-item.task-priority {
+    border-left: 4px solid var(--warning);
+    background: linear-gradient(90deg, rgba(255, 169, 77, 0.05) 0%, var(--bg-secondary) 20%);
+}
+
+/* Completed task styling */
+.task-item.task-completed {
+    border-left: 4px solid #22c55e;
+    opacity: 0.6;
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.05) 0%, var(--bg-secondary) 20%);
+}
+
+/* Ignored task styling */
+.task-item.task-ignored {
+    border-left: 4px solid var(--text-muted);
+    opacity: 0.4;
+    background: var(--bg-tertiary);
+}
+
+.task-item.task-ignored .task-title,
+.task-item.task-ignored .task-description {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+/* Priority and ignored badges */
+.priority-badge {
+    background: var(--warning);
+    color: var(--bg-primary);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ignored-badge {
+    background: var(--text-muted);
+    color: var(--bg-primary);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Quick action buttons */
+.task-quick-actions {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.quick-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.quick-btn:hover {
+    opacity: 1;
+    border-color: var(--accent);
+    transform: scale(1.1);
+}
+
+.quick-btn.active {
+    opacity: 1;
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+}
+
 .task-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .task-type {
@@ -1290,6 +1402,7 @@ a:hover {
     font-weight: 600;
     color: var(--text-primary);
     flex: 1;
+    min-width: 150px;
 }
 
 .nostr-indicator {
@@ -1367,6 +1480,252 @@ a:hover {
 .empty-state h2 {
     color: var(--text-primary);
     margin-bottom: 0.5rem;
+}
+
+/* Admin Badge */
+.admin-badge {
+    background: var(--accent-secondary);
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+/* Task Admin Controls */
+.task-admin-controls {
+    margin-left: auto;
+}
+
+.task-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Task Detail View in Modal */
+.task-detail-view {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.task-detail-row {
+    margin-bottom: 0.75rem;
+}
+
+.task-detail-row:last-child {
+    margin-bottom: 0;
+}
+
+.task-detail-label {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.task-detail-value {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.task-detail-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.mono {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+/* Task Detail Modal (public view) */
+.task-type-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.task-detail-title {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.task-detail-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.task-detail-meta {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.task-detail-meta .task-detail-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.task-detail-meta .task-detail-row:last-child {
+    border-bottom: none;
+}
+
+.admin-notes-section {
+    background: var(--accent-subtle);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.admin-notes-section h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--accent);
+    font-size: 0.9rem;
+}
+
+.admin-notes-section p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.nostr-link {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.nostr-link:hover {
+    text-decoration: underline;
+}
+
+/* Task item hover effect */
+.task-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 1rem;
+}
+
+.comments-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.comment-count {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+}
+
+.comments-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.comment-item {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.comment-item.comment-admin {
+    background: var(--accent-subtle);
+    border-left: 3px solid var(--accent);
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.comment-date {
+    color: var(--text-muted);
+}
+
+.admin-badge-small {
+    background: var(--accent);
+    color: var(--bg-primary);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.comment-content {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.add-comment-section {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.add-comment-section .form-textarea {
+    margin-bottom: 0.75rem;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.comment-notice {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 /* Responsive */

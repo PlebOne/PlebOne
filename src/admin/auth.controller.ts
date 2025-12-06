@@ -27,6 +27,14 @@ export class AuthController {
     };
   }
 
+  @Post('check-admin')
+  checkAdmin(@Body() body: { pubkey: string }) {
+    const adminPubkeys = (process.env.ADMIN_PUBKEYS || '').split(',').map(k => k.trim());
+    return { 
+      isAdmin: adminPubkeys.includes(body.pubkey),
+    };
+  }
+
   private cleanupOldChallenges() {
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
     for (const [challenge, timestamp] of this.challenges.entries()) {

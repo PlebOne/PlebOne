@@ -44,6 +44,12 @@ export class ProjectTask {
   })
   status: TaskStatus;
 
+  @Column({ default: false })
+  priority: boolean;
+
+  @Column({ default: false })
+  ignored: boolean;
+
   @Column({ nullable: true })
   authorPubkey: string;
 

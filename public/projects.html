@@ -68,10 +68,14 @@
 
             <!-- Submit New Task -->
             <div class="submit-task-section">
-                <h2>SUBMIT A REQUEST</h2>
-                <p class="text-muted">Report a bug, request a feature, or suggest an improvement. Sign in with Nostr to have your submission posted to the Nostr network.</p>
-                
-                <form id="task-form" class="task-form">
+                <div class="submit-header" onclick="toggleSubmitForm()">
+                    <h2>SUBMIT A REQUEST</h2>
+                    <span id="submit-toggle" class="toggle-icon">▼</span>
+                </div>
+                <div id="submit-form-container" class="submit-form-container collapsed">
+                    <p class="text-muted">Report a bug, request a feature, or suggest an improvement. Sign in with Nostr to have your submission posted to the Nostr network.</p>
+                    
+                    <form id="task-form" class="task-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="task-type" class="form-label">TYPE</label>
@@ -101,7 +105,8 @@
                             <span class="nostr-badge">⚡ Nostr</span> Sign in to post this to Nostr
                         </span>
                     </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
             <!-- Task List -->
@@ -131,6 +136,145 @@
             </div>
         </section>
     </main>
+
+    <!-- Task Detail Modal (viewable by anyone) -->
+    <div id="task-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">TASK DETAILS</h2>
+                <button class="modal-close" onclick="closeTaskDetailModal()">&times;</button>
+            </div>
+            
+            <div class="task-detail-view">
+                <div class="task-detail-row">
+                    <span id="detail-task-type-icon" class="task-type-icon"></span>
+                    <h3 id="detail-task-title" class="task-detail-title"></h3>
+                </div>
+                <div class="task-detail-badges" id="detail-task-badges"></div>
+                <p id="detail-task-description" class="task-detail-description"></p>
+                
+                <div class="task-detail-meta">
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Status:</span>
+                        <span id="detail-task-status" class="task-detail-value"></span>
+                    </div>
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Submitted:</span>
+                        <span id="detail-task-created" class="task-detail-value"></span>
+                    </div>
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Last Updated:</span>
+                        <span id="detail-task-updated" class="task-detail-value"></span>
+                    </div>
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Author:</span>
+                        <span id="detail-task-author" class="task-detail-value mono"></span>
+                    </div>
+                    <div class="task-detail-row" id="detail-nostr-row">
+                        <span class="task-detail-label">Nostr:</span>
+                        <span id="detail-task-nostr" class="task-detail-value"></span>
+                    </div>
+                </div>
+                
+                <div id="detail-admin-notes-section" class="admin-notes-section" style="display: none;">
+                    <h4>Admin Response</h4>
+                    <p id="detail-admin-notes"></p>
+                </div>
+                
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <h4 class="comments-header">
+                        <span>💬 Comments</span>
+                        <span id="comment-count" class="comment-count">0</span>
+                    </h4>
+                    
+                    <div id="comments-list" class="comments-list">
+                        <p class="text-muted">No comments yet.</p>
+                    </div>
+                    
+                    <div class="add-comment-section">
+                        <textarea id="comment-input" class="form-textarea" rows="2" placeholder="Add a comment..." maxlength="2000"></textarea>
+                        <div class="comment-actions">
+                            <button class="btn btn-small" onclick="submitComment()">
+                                <span id="comment-btn-text">Post Comment</span>
+                            </button>
+                            <span id="comment-nostr-notice" class="text-muted comment-notice">
+                                <span class="nostr-badge">⚡</span> Sign in to post to Nostr
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions" id="detail-modal-actions">
+                <button class="btn btn-secondary" onclick="closeTaskDetailModal()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Task Modal -->
+    <div id="admin-task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">MANAGE TASK</h2>
+                <button class="modal-close" onclick="closeAdminTaskModal()">&times;</button>
+            </div>
+            
+            <div class="task-detail-view">
+                <div class="task-detail-row">
+                    <span class="task-detail-label">Title:</span>
+                    <span id="admin-task-title" class="task-detail-value"></span>
+                </div>
+                <div class="task-detail-row">
+                    <span class="task-detail-label">Type:</span>
+                    <span id="admin-task-type" class="task-detail-value"></span>
+                </div>
+                <div class="task-detail-row">
+                    <span class="task-detail-label">Description:</span>
+                    <p id="admin-task-description" class="task-detail-description"></p>
+                </div>
+                <div class="task-detail-row">
+                    <span class="task-detail-label">Author:</span>
+                    <span id="admin-task-author" class="task-detail-value mono"></span>
+                </div>
+                <div class="task-detail-row">
+                    <span class="task-detail-label">Nostr Event:</span>
+                    <span id="admin-task-nostr" class="task-detail-value mono"></span>
+                </div>
+            </div>
+            
+            <hr style="border-color: var(--border-subtle); margin: 1.5rem 0;">
+            
+            <div class="form-group">
+                <label class="form-label">STATUS</label>
+                <select id="admin-task-status" class="form-select">
+                    <option value="open">Open</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="closed">Closed</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">ADMIN NOTES</label>
+                <textarea id="admin-task-notes" class="form-textarea" rows="3" placeholder="Add notes about resolution, progress, etc."></textarea>
+            </div>
+            
+            <div class="form-group" id="nostr-reply-group">
+                <label>
+                    <input type="checkbox" id="admin-task-reply-nostr" class="form-checkbox">
+                    <span class="form-label" style="display: inline;">POST UPDATE TO NOSTR</span>
+                </label>
+                <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.8rem;">Post a reply to the original Nostr event with this status update.</p>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn" onclick="saveTaskChanges()">SAVE</button>
+                <button class="btn btn-secondary" onclick="closeAdminTaskModal()">CANCEL</button>
+                <button class="btn btn-danger" onclick="deleteTask()">DELETE</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer">
         <p>PLEB.ONE - A spin-off from <a href="https://11b.dev" target="_blank" style="color: inherit; text-decoration: underline;">11b.Dev</a> | Open Source | Freedom Tech | <a href="https://github.com/PlebOne" target="_blank" style="color: inherit; text-decoration: underline;">GitHub</a> | <a href="https://primal.net/PlebOne" target="_blank" style="color: inherit; text-decoration: underline;">Nostr</a></p>

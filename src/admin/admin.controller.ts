@@ -129,6 +129,21 @@ export class AdminController {
     return task;
   }
 
+  @Put('tasks/:id/priority')
+  async toggleTaskPriority(@Param('id') id: string) {
+    return this.taskService.togglePriority(id);
+  }
+
+  @Put('tasks/:id/ignored')
+  async toggleTaskIgnored(@Param('id') id: string) {
+    return this.taskService.toggleIgnored(id);
+  }
+
+  @Put('tasks/:id/complete')
+  async markTaskCompleted(@Param('id') id: string) {
+    return this.taskService.markCompleted(id);
+  }
+
   @Delete('tasks/:id')
   async deleteTask(@Param('id') id: string) {
     await this.taskService.remove(id);

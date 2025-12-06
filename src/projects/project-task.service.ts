@@ -78,6 +78,51 @@ export class ProjectTaskService {
     return this.taskRepository.save(task);
   }
 
+  async togglePriority(id: string): Promise<ProjectTask> {
+    const task = await this.taskRepository.findOne({ where: { id } });
+    
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+    
+    task.priority = !task.priority;
+    // If marking as priority, unmark ignored
+    if (task.priority) {
+      task.ignored = false;
+    }
+    
+    return this.taskRepository.save(task);
+  }
+
+  async toggleIgnored(id: string): Promise<ProjectTask> {
+    const task = await this.taskRepository.findOne({ where: { id } });
+    
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+    
+    task.ignored = !task.ignored;
+    // If marking as ignored, unmark priority
+    if (task.ignored) {
+      task.priority = false;
+    }
+    
+    return this.taskRepository.save(task);
+  }
+
+  async markCompleted(id: string): Promise<ProjectTask> {
+    const task = await this.taskRepository.findOne({ where: { id } });
+    
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+    
+    task.status = TaskStatus.COMPLETED;
+    task.priority = false;
+    
+    return this.taskRepository.save(task);
+  }
+
   async setNostrEventId(id: string, nostrEventId: string): Promise<ProjectTask> {
     const task = await this.taskRepository.findOne({ where: { id } });
     
