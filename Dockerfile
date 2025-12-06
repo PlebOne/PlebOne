@@ -1,5 +1,5 @@
-# Use Node 20 Alpine for smaller image size
-FROM node:20-alpine
+# Use Node 22 Alpine for smaller image size
+FROM node:22-alpine
 
 # Set working directory
 WORKDIR /app

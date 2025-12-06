@@ -18,6 +18,18 @@ export class ProjectsService {
     });
   }
 
+  async findOne(id: string): Promise<Project> {
+    const project = await this.projectRepository.findOne({
+      where: { id, active: true },
+    });
+    
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+    
+    return project;
+  }
+
   async findAllAdmin(): Promise<Project[]> {
     return this.projectRepository.find({
       order: { createdAt: 'DESC' },

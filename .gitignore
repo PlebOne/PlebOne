@@ -8,6 +8,8 @@ build/
 # Environment variables
 .env.local
 .env.production
+.env.prod
+.credentials.secure
 
 # IDE
 .vscode/

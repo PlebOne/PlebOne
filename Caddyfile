@@ -1,0 +1,31 @@
+# Caddy configuration for PlebOne
+# This file is for reference - the Docker labels in docker-compose.prod.yml
+# should automatically configure Caddy if you're using Caddy Docker Proxy
+
+pleb.one {
+    reverse_proxy plebone-app-prod:3000
+    encode gzip
+    
+    # Optional: Add security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security max-age=31536000;
+        # Prevent clickjacking
+        X-Frame-Options DENY
+        # Prevent content type sniffing
+        X-Content-Type-Options nosniff
+        # XSS Protection
+        X-XSS-Protection "1; mode=block"
+        # Content Security Policy (adjust as needed)
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    }
+    
+    # Optional: Enable access logging
+    log {
+        output file /var/log/caddy/pleb.one.log {
+            roll_size 100mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+    }
+}

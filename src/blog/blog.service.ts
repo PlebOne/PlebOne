@@ -15,7 +15,7 @@ export class BlogService {
     return this.blogPostRepository.find({
       where: { published: true },
       order: { createdAt: 'DESC' },
-      select: ['id', 'title', 'createdAt', 'tags'],
+      select: ['id', 'title', 'content', 'createdAt', 'tags'],
     });
   }
 
@@ -39,7 +39,8 @@ export class BlogService {
 
   async create(createBlogPostDto: CreateBlogPostDto): Promise<BlogPost> {
     const post = this.blogPostRepository.create(createBlogPostDto);
-    return this.blogPostRepository.save(post);
+    const savedPost = await this.blogPostRepository.save(post);
+    return savedPost;
   }
 
   async update(id: string, updateBlogPostDto: UpdateBlogPostDto): Promise<BlogPost> {
@@ -50,6 +51,18 @@ export class BlogService {
     }
     
     Object.assign(post, updateBlogPostDto);
+    const savedPost = await this.blogPostRepository.save(post);
+    return savedPost;
+  }
+
+  async updateNostrEventId(id: string, nostrEventId: string): Promise<BlogPost> {
+    const post = await this.blogPostRepository.findOne({ where: { id } });
+    
+    if (!post) {
+      throw new NotFoundException('Blog post not found');
+    }
+    
+    post.nostrEventId = nostrEventId;
     return this.blogPostRepository.save(post);
   }
 

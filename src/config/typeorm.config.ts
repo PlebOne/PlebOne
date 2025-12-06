@@ -12,7 +12,7 @@ export const typeOrmConfig: DataSourceOptions = {
   database: process.env.DB_DATABASE || 'plebone',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-  synchronize: process.env.NODE_ENV === 'development',
+  synchronize: true, // Auto-create tables (use migrations in production later)
   logging: process.env.NODE_ENV === 'development',
 };
 

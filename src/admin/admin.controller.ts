@@ -2,8 +2,13 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nes
 import { AdminGuard } from './admin.guard';
 import { BlogService } from '../blog/blog.service';
 import { ProjectsService } from '../projects/projects.service';
+import { ProjectTaskService } from '../projects/project-task.service';
 import { CreateBlogPostDto, UpdateBlogPostDto } from '../blog/blog-post.dto';
 import { CreateProjectDto, UpdateProjectDto } from '../projects/project.dto';
+import { UpdateProjectTaskDto } from '../projects/project-task.dto';
+import { TaskStatus } from '../projects/project-task.entity';
+import { SettingsService } from '../config/settings.service';
+import { NostrService } from '../config/nostr.service';
 
 @Controller('api/admin')
 @UseGuards(AdminGuard)
@@ -11,6 +16,9 @@ export class AdminController {
   constructor(
     private readonly blogService: BlogService,
     private readonly projectsService: ProjectsService,
+    private readonly taskService: ProjectTaskService,
+    private readonly settingsService: SettingsService,
+    private readonly nostrService: NostrService,
   ) {}
 
   // Blog post admin endpoints
@@ -55,5 +63,94 @@ export class AdminController {
   async deleteProject(@Param('id') id: string) {
     await this.projectsService.remove(id);
     return { message: 'Project deleted successfully' };
+  }
+
+  // Settings endpoints
+  @Get('settings/nostr-relays')
+  async getNostrRelays() {
+    return {
+      relays: await this.settingsService.getRelays(),
+    };
+  }
+
+  @Post('settings/nostr-relays')
+  async setNostrRelays(@Body() body: { relays: string[] }) {
+    await this.settingsService.setRelays(body.relays);
+    return { message: 'Nostr relays updated successfully', relays: body.relays };
+  }
+
+  // Nostr publishing endpoint
+  @Post('blog/:id/publish-nostr')
+  async publishBlogPostToNostr(@Param('id') id: string, @Body() body: { signedEvent: any }) {
+    const eventId = await this.nostrService.publishSignedEvent(body.signedEvent);
+    if (eventId) {
+      await this.blogService.updateNostrEventId(id, eventId);
+    }
+    return { 
+      message: eventId ? 'Published to Nostr successfully' : 'Failed to publish to Nostr',
+      eventId,
+    };
+  }
+
+  // Task management endpoints
+  @Get('tasks')
+  async getAllTasks() {
+    // Get all tasks across all projects for admin view
+    const projects = await this.projectsService.findAllAdmin();
+    const tasksPromises = projects.map(async (project) => {
+      const tasks = await this.taskService.findAllByProject(project.id);
+      return tasks.map(task => ({ ...task, projectName: project.name }));
+    });
+    const tasksArrays = await Promise.all(tasksPromises);
+    return tasksArrays.flat().sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  @Get('projects/:projectId/tasks')
+  async getProjectTasks(@Param('projectId') projectId: string) {
+    return this.taskService.findAllByProject(projectId);
+  }
+
+  @Put('tasks/:id')
+  async updateTask(
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateProjectTaskDto,
+  ) {
+    return this.taskService.update(id, updateTaskDto);
+  }
+
+  @Put('tasks/:id/status')
+  async updateTaskStatus(
+    @Param('id') id: string,
+    @Body() body: { status: TaskStatus; adminNotes?: string },
+  ) {
+    const task = await this.taskService.updateStatus(id, body.status, body.adminNotes);
+    return task;
+  }
+
+  @Delete('tasks/:id')
+  async deleteTask(@Param('id') id: string) {
+    await this.taskService.remove(id);
+    return { message: 'Task deleted successfully' };
+  }
+
+  // Publish a reply to a task's original Nostr event
+  @Post('tasks/:id/reply-nostr')
+  async publishTaskReply(
+    @Param('id') id: string,
+    @Body() body: { signedEvent: any },
+  ) {
+    const task = await this.taskService.findOne(id);
+    
+    if (!task.nostrEventId) {
+      return { message: 'Task has no associated Nostr event', eventId: null };
+    }
+
+    const eventId = await this.nostrService.publishReply(body.signedEvent);
+    return {
+      message: eventId ? 'Reply published to Nostr successfully' : 'Failed to publish reply',
+      eventId,
+    };
   }
 }

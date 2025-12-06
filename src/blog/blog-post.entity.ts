@@ -17,6 +17,9 @@ export class BlogPost {
   @Column({ default: true })
   published: boolean;
 
+  @Column({ nullable: true })
+  nostrEventId?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

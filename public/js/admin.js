@@ -1,10 +1,13 @@
 // Admin interface with Nostr NIP-07 authentication
-import { finalizeEvent, verifyEvent, getPublicKey } from 'https://cdn.jsdelivr.net/npm/nostr-tools@2.7.0/+esm';
+import { finalizeEvent, verifyEvent, getPublicKey } from 'https://cdn.jsdelivr.net/npm/nostr-tools@2.17.2/+esm';
 
 let authToken = null;
 let currentPubkey = null;
 let editingPostId = null;
 let editingProjectId = null;
+let editingTaskId = null;
+let allTasks = [];
+let allProjects = [];
 
 // Check for NIP-07 extension
 function checkNostrExtension() {
@@ -50,6 +53,8 @@ document.getElementById('login-btn').addEventListener('click', async () => {
         // Load admin data
         loadBlogPosts();
         loadProjects();
+        loadTasks();
+        loadNostrSettings();
         
     } catch (error) {
         console.error('Login error:', error);
@@ -224,16 +229,29 @@ document.getElementById('post-form').addEventListener('submit', async (e) => {
     };
     
     try {
+        let savedPost;
+        const isUpdate = !!editingPostId;
+        
         if (editingPostId) {
-            await apiRequest(`/api/admin/blog/${editingPostId}`, {
+            savedPost = await apiRequest(`/api/admin/blog/${editingPostId}`, {
                 method: 'PUT',
                 body: JSON.stringify(data)
             });
         } else {
-            await apiRequest('/api/admin/blog', {
+            savedPost = await apiRequest('/api/admin/blog', {
                 method: 'POST',
                 body: JSON.stringify(data)
             });
+        }
+        
+        // Publish to Nostr if published
+        if (data.published && window.nostr) {
+            try {
+                await publishToNostr(savedPost, isUpdate);
+            } catch (error) {
+                console.error('Failed to publish to Nostr:', error);
+                // Don't fail the whole operation if Nostr publishing fails
+            }
         }
         
         closePostModal();
@@ -321,8 +339,294 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
     }
 });
 
+// Task Management
+async function loadTasks() {
+    const listEl = document.getElementById('admin-tasks-list');
+    const projectFilter = document.getElementById('task-project-filter');
+    
+    try {
+        // Load tasks
+        allTasks = await apiRequest('/api/admin/tasks');
+        
+        // Populate project filter if not already done
+        if (projectFilter.options.length <= 1) {
+            const projects = await apiRequest('/api/admin/projects');
+            allProjects = projects;
+            projects.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                projectFilter.appendChild(opt);
+            });
+        }
+        
+        renderTasks();
+    } catch (error) {
+        console.error('Error loading tasks:', error);
+        listEl.innerHTML = '<p class="error">Failed to load tasks: ' + error.message + '</p>';
+    }
+}
+
+function renderTasks() {
+    const listEl = document.getElementById('admin-tasks-list');
+    const projectFilterValue = document.getElementById('task-project-filter').value;
+    const statusFilterValue = document.getElementById('task-status-filter').value;
+    
+    let filteredTasks = allTasks;
+    
+    if (projectFilterValue) {
+        filteredTasks = filteredTasks.filter(t => t.projectId === projectFilterValue);
+    }
+    
+    if (statusFilterValue) {
+        filteredTasks = filteredTasks.filter(t => t.status === statusFilterValue);
+    }
+    
+    if (filteredTasks.length === 0) {
+        listEl.innerHTML = '<p class="text-muted">No tasks found.</p>';
+        return;
+    }
+    
+    listEl.innerHTML = filteredTasks.map(task => {
+        const date = new Date(task.createdAt).toISOString().split('T')[0];
+        const typeIcon = task.type === 'bug' ? '🐛' : task.type === 'feature' ? '✨' : '📋';
+        const statusClass = `status-${task.status}`;
+        const statusLabel = task.status.replace('_', ' ').toUpperCase();
+        const nostrBadge = task.nostrEventId ? '<span class="nostr-indicator" title="Has Nostr event">⚡</span>' : '';
+        
+        return `
+            <div class="admin-item task-item-admin ${statusClass}">
+                <div class="admin-item-content">
+                    <div class="admin-item-title">
+                        ${typeIcon} ${escapeHtml(task.title)} ${nostrBadge}
+                        <span class="status-badge ${statusClass}">${statusLabel}</span>
+                    </div>
+                    <div class="admin-item-meta">
+                        ${task.projectName || 'Unknown Project'} | ${date} | 
+                        ${task.authorPubkey ? `Author: ${task.authorPubkey.substring(0, 8)}...` : 'Anonymous'}
+                    </div>
+                </div>
+                <div class="admin-item-actions">
+                    <button class="btn btn-secondary" onclick="editTask('${task.id}')">MANAGE</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Task filter event listeners
+document.getElementById('task-project-filter')?.addEventListener('change', renderTasks);
+document.getElementById('task-status-filter')?.addEventListener('change', renderTasks);
+
+// Task Modal
+document.getElementById('close-task-modal')?.addEventListener('click', closeTaskModal);
+document.getElementById('cancel-task-btn')?.addEventListener('click', closeTaskModal);
+
+function closeTaskModal() {
+    document.getElementById('task-modal').classList.remove('active');
+    editingTaskId = null;
+}
+
+window.editTask = async function(id) {
+    try {
+        const task = allTasks.find(t => t.id === id);
+        if (!task) return;
+        
+        editingTaskId = id;
+        document.getElementById('task-modal-title').textContent = 'MANAGE TASK';
+        document.getElementById('task-id').value = task.id;
+        document.getElementById('task-project-name').value = task.projectName || 'Unknown';
+        document.getElementById('task-type-display').value = task.type.toUpperCase();
+        document.getElementById('task-title').value = task.title;
+        document.getElementById('task-description').value = task.description;
+        document.getElementById('task-author').value = task.authorPubkey || 'Anonymous';
+        document.getElementById('task-nostr-event').value = task.nostrEventId || 'None';
+        document.getElementById('task-status').value = task.status;
+        document.getElementById('task-admin-notes').value = task.adminNotes || '';
+        document.getElementById('task-reply-nostr').checked = false;
+        
+        // Show/hide Nostr reply option based on whether task has event
+        const nostrCheckbox = document.getElementById('task-reply-nostr').parentElement;
+        nostrCheckbox.style.display = task.nostrEventId ? 'block' : 'none';
+        
+        document.getElementById('task-modal').classList.add('active');
+    } catch (error) {
+        alert('Failed to load task: ' + error.message);
+    }
+};
+
+document.getElementById('delete-task-btn')?.addEventListener('click', async () => {
+    if (!editingTaskId) return;
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    
+    try {
+        await apiRequest(`/api/admin/tasks/${editingTaskId}`, { method: 'DELETE' });
+        closeTaskModal();
+        loadTasks();
+    } catch (error) {
+        alert('Failed to delete task: ' + error.message);
+    }
+});
+
+document.getElementById('task-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!editingTaskId) return;
+    
+    const status = document.getElementById('task-status').value;
+    const adminNotes = document.getElementById('task-admin-notes').value;
+    const shouldReplyNostr = document.getElementById('task-reply-nostr').checked;
+    
+    try {
+        // Update task status
+        await apiRequest(`/api/admin/tasks/${editingTaskId}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({ status, adminNotes })
+        });
+        
+        // If should reply to Nostr, create and sign a reply event
+        if (shouldReplyNostr) {
+            const task = allTasks.find(t => t.id === editingTaskId);
+            if (task && task.nostrEventId && task.authorPubkey && window.nostr) {
+                await publishTaskReplyToNostr(task, status, adminNotes);
+            }
+        }
+        
+        closeTaskModal();
+        loadTasks();
+        alert('Task updated successfully!');
+    } catch (error) {
+        alert('Failed to update task: ' + error.message);
+    }
+});
+
+async function publishTaskReplyToNostr(task, status, adminNotes) {
+    if (!window.nostr || !currentPubkey) return;
+    
+    try {
+        const statusLabel = status.replace('_', ' ');
+        let content = `📋 Task Update: ${task.title}\n\nStatus: ${statusLabel.toUpperCase()}`;
+        
+        if (adminNotes) {
+            content += `\n\nNotes: ${adminNotes}`;
+        }
+        
+        content += `\n\n🔗 https://pleb.one/projects.html?id=${task.projectId}`;
+        
+        // Create reply event with proper tags
+        const eventTemplate = {
+            kind: 1,
+            created_at: Math.floor(Date.now() / 1000),
+            tags: [
+                ['e', task.nostrEventId, '', 'reply'], // Reply to original event
+                ['p', task.authorPubkey], // Tag the original author
+                ['t', 'plebone'],
+                ['t', 'task-update'],
+            ],
+            content: content,
+        };
+        
+        // Sign with NIP-07
+        const signedEvent = await window.nostr.signEvent(eventTemplate);
+        
+        // Publish via server
+        await apiRequest(`/api/admin/tasks/${task.id}/reply-nostr`, {
+            method: 'POST',
+            body: JSON.stringify({ signedEvent })
+        });
+        
+        console.log('Task reply published to Nostr');
+    } catch (error) {
+        console.error('Error publishing task reply to Nostr:', error);
+        // Don't throw - this is optional functionality
+    }
+}
+
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Nostr Settings Management
+async function loadNostrSettings() {
+    try {
+        // Load relays
+        const relaysResponse = await apiRequest('/api/admin/settings/nostr-relays');
+        if (relaysResponse.relays) {
+            document.getElementById('nostr-relays').value = relaysResponse.relays.join('\n');
+        }
+    } catch (error) {
+        console.error('Error loading Nostr settings:', error);
+    }
+}
+
+document.getElementById('save-relays-btn').addEventListener('click', async () => {
+    const relaysText = document.getElementById('nostr-relays').value;
+    const relays = relaysText.split('\n')
+        .map(r => r.trim())
+        .filter(r => r.length > 0 && r.startsWith('wss://'));
+
+    if (relays.length === 0) {
+        alert('Please enter at least one valid relay URL (wss://...)');
+        return;
+    }
+
+    try {
+        await apiRequest('/api/admin/settings/nostr-relays', {
+            method: 'POST',
+            body: JSON.stringify({ relays }),
+        });
+        alert('Relays saved successfully!');
+    } catch (error) {
+        alert('Failed to save relays: ' + error.message);
+    }
+});
+
+// Publish blog post to Nostr
+async function publishToNostr(post, isUpdate = false) {
+    if (!window.nostr) {
+        console.log('No Nostr extension available, skipping Nostr publishing');
+        return;
+    }
+
+    try {
+        // Generate identifier from title
+        const identifier = post.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+        const title = isUpdate ? `${post.title} - Updated` : post.title;
+        const publishedAt = Math.floor(new Date(post.createdAt).getTime() / 1000);
+
+        // Create NIP-23 long-form content event template
+        const eventTemplate = {
+            kind: 30023,
+            created_at: publishedAt,
+            tags: [
+                ['d', identifier],
+                ['title', title],
+                ['published_at', String(publishedAt)],
+                ['summary', post.content.substring(0, 200) + '...'],
+                ...(post.tags || []).map(tag => ['t', tag.toLowerCase()]),
+            ],
+            content: post.content,
+        };
+
+        // Sign with NIP-07
+        const signedEvent = await window.nostr.signEvent(eventTemplate);
+
+        // Send to server to publish to relays
+        await apiRequest(`/api/admin/blog/${post.id}/publish-nostr`, {
+            method: 'POST',
+            body: JSON.stringify({ signedEvent }),
+        });
+
+        console.log('Published to Nostr successfully');
+    } catch (error) {
+        console.error('Error publishing to Nostr:', error);
+        throw error;
+    }
+}
+

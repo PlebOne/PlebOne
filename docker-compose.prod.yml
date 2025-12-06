@@ -1,19 +1,23 @@
-version: '3.8'
+networks:
+  plebone-network:
+    driver: bridge
+  pleb-services:
+    external: true
 
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: plebone-postgres-prod
     restart: unless-stopped
     environment:
       POSTGRES_USER: plebone
       POSTGRES_PASSWORD: ${DB_PASSWORD:-plebone_secure_password}
       POSTGRES_DB: plebone
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - plebone-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U plebone"]
       interval: 10s
@@ -27,8 +31,6 @@ services:
       dockerfile: Dockerfile
     container_name: plebone-app-prod
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       - NODE_ENV=production
       - DB_HOST=postgres
@@ -38,6 +40,9 @@ services:
       - DB_DATABASE=plebone
       - PORT=3000
       - ADMIN_PUBKEYS=${ADMIN_PUBKEYS}
+    networks:
+      - plebone-network
+      - pleb-services
     depends_on:
       postgres:
         condition: service_healthy

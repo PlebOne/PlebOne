@@ -4,36 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects - PlebOne</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <meta name="description" content="Open source projects from Pleb.One - submit bugs, request features, and track progress.">
+    <link rel="stylesheet" href="/css/style.css?v=20251206">
 </head>
 <body>
     <nav class="nav">
         <div class="nav-container">
-            <a href="/" class="nav-logo">PLEBONE</a>
+            <a href="/" class="nav-logo">PLEB.ONE</a>
             <div class="nav-links">
                 <a href="/about.html" class="nav-link">ABOUT</a>
                 <a href="/projects.html" class="nav-link active">PROJECTS</a>
                 <a href="/blog.html" class="nav-link">BLOG</a>
                 <a href="/donations.html" class="nav-link">DONATIONS</a>
-                <a href="/admin.html" class="nav-link nav-admin">ADMIN</a>
             </div>
         </div>
     </nav>
 
     <main class="container">
-        <section class="content">
-            <h1 class="page-title">PROJECTS</h1>
+        <!-- Project Selector -->
+        <section class="project-header">
+            <div class="project-selector-container">
+                <label for="project-select" class="form-label">SELECT PROJECT</label>
+                <select id="project-select" class="form-select">
+                    <option value="">-- Choose a project --</option>
+                </select>
+            </div>
             
-            <div id="projects-list" class="projects-list">
-                <p class="loading">Loading projects...</p>
+            <!-- User Auth Section -->
+            <div id="user-auth" class="user-auth">
+                <button id="nostr-login-btn" class="btn btn-secondary">
+                    <span class="btn-icon">⚡</span> Sign in with Nostr
+                </button>
+                <div id="user-info" class="user-info" style="display: none;">
+                    <span id="user-pubkey" class="user-pubkey"></span>
+                    <button id="nostr-logout-btn" class="btn btn-small">Logout</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Details (shown when project selected) -->
+        <section id="project-details" class="project-details" style="display: none;">
+            <div class="project-info">
+                <h1 id="project-name" class="project-title"></h1>
+                <p id="project-description" class="project-description"></p>
+                <div id="project-links" class="project-links"></div>
+            </div>
+
+            <!-- Task Stats -->
+            <div id="task-stats" class="task-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-open">0</span>
+                    <span class="stat-label">Open</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-in-progress">0</span>
+                    <span class="stat-label">In Progress</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-completed">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            </div>
+
+            <!-- Submit New Task -->
+            <div class="submit-task-section">
+                <h2>SUBMIT A REQUEST</h2>
+                <p class="text-muted">Report a bug, request a feature, or suggest an improvement. Sign in with Nostr to have your submission posted to the Nostr network.</p>
+                
+                <form id="task-form" class="task-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-type" class="form-label">TYPE</label>
+                            <select id="task-type" class="form-select" required>
+                                <option value="bug">🐛 Bug Report</option>
+                                <option value="feature">✨ Feature Request</option>
+                                <option value="task">📋 Task / Improvement</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-title" class="form-label">TITLE</label>
+                        <input type="text" id="task-title" class="form-input" placeholder="Brief summary of the issue or request" required maxlength="200">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-description" class="form-label">DESCRIPTION</label>
+                        <textarea id="task-description" class="form-textarea" rows="5" placeholder="Provide details about the bug, feature, or improvement..." required maxlength="2000"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn" id="submit-task-btn">
+                            <span id="submit-btn-text">Submit</span>
+                        </button>
+                        <span id="nostr-notice" class="text-muted nostr-notice">
+                            <span class="nostr-badge">⚡ Nostr</span> Sign in to post this to Nostr
+                        </span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Task List -->
+            <div class="tasks-section">
+                <div class="tasks-header">
+                    <h2>REQUESTS & TASKS</h2>
+                    <div class="task-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="open">Open</button>
+                        <button class="filter-btn" data-filter="in_progress">In Progress</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                    </div>
+                </div>
+                
+                <div id="tasks-list" class="tasks-list">
+                    <p class="loading">Loading tasks...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- No Project Selected -->
+        <section id="no-project" class="no-project">
+            <div class="empty-state">
+                <p class="empty-icon">📦</p>
+                <h2>Select a Project</h2>
+                <p class="text-muted">Choose a project from the dropdown above to view details, submit bugs, or request features.</p>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <p>PLEBONE - A spin-off from <a href="https://11b.dev" target="_blank" style="color: inherit; text-decoration: underline;">11b.Dev</a> | Open Source | Freedom Tech</p>
+        <p>PLEB.ONE - A spin-off from <a href="https://11b.dev" target="_blank" style="color: inherit; text-decoration: underline;">11b.Dev</a> | Open Source | Freedom Tech | <a href="https://github.com/PlebOne" target="_blank" style="color: inherit; text-decoration: underline;">GitHub</a> | <a href="https://primal.net/PlebOne" target="_blank" style="color: inherit; text-decoration: underline;">Nostr</a></p>
     </footer>
 
-    <script src="/js/projects.js"></script>
+    <script type="module" src="/js/projects.js"></script>
 </body>
 </html>

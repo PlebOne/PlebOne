@@ -27,19 +27,36 @@ async function loadBlogPosts() {
         
         html += posts.map(post => {
             const date = new Date(post.createdAt).toISOString().split('T')[0];
-            const tags = post.tags && post.tags.length > 0 ? 
-                `<span class="blog-tags">${post.tags.map(tag => 
-                    `<a href="/blog.html?tag=${encodeURIComponent(tag)}" class="blog-tag">${escapeHtml(tag)}</a>`
-                ).join('')}</span>` : '';
+            const tagsHtml = post.tags && post.tags.length > 0 ? 
+                post.tags.map(tag => 
+                    `<a href="/blog.html?tag=${encodeURIComponent(tag)}" class="blog-tag" onclick="event.stopPropagation()">${escapeHtml(tag)}</a>`
+                ).join('') : '';
+
+            // Prefer the new `content` field; fall back to any legacy `body`
+            const rawContent = post.content ?? post.body ?? '';
+            let excerpt = '';
+            if (rawContent) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawContent;
+                const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                excerpt = plainText.trim().length > 0 ? plainText.trim().slice(0, 220) : '';
+                if (excerpt.length === 220) {
+                    excerpt = `${excerpt}...`;
+                }
+            }
             
             return `
-                <a href="/post.html?id=${post.id}" class="blog-item">
-                    <span class="blog-date">${date}</span>
-                    <span class="blog-title-with-tags">
-                        <span class="blog-title">${escapeHtml(post.title)}</span>
-                        ${tags}
-                    </span>
-                </a>
+                <article class="blog-post-card">
+                    <h2 class="blog-post-title">
+                        <a href="/post.html?id=${post.id}">${escapeHtml(post.title)}</a>
+                    </h2>
+                    <div class="blog-post-meta">
+                        <span class="blog-post-date">${date}</span>
+                        ${tagsHtml ? `<div class="blog-post-tags">${tagsHtml}</div>` : ''}
+                    </div>
+                    ${excerpt ? `<p class="blog-post-excerpt">${escapeHtml(excerpt)}</p>` : ''}
+                    <a href="/post.html?id=${post.id}" class="blog-read-more">Read More →</a>
+                </article>
             `;
         }).join('');
         

@@ -23,6 +23,10 @@ async function loadPost() {
         
         // Render markdown
         const html = marked.parse(post.content);
+
+        // Build a plain-text excerpt for metadata
+    const excerpt = buildExcerpt(html) || 'Read the latest article from Pleb.One.';
+        updatePageMetadata(post.title, excerpt);
         
         const tags = post.tags && post.tags.length > 0 ? 
             `<div class="post-tags">${post.tags.map(tag => 
@@ -45,6 +49,36 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function buildExcerpt(html) {
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    const plainText = temp.textContent || temp.innerText || '';
+    const collapsed = plainText.trim().replace(/\s+/g, ' ');
+    if (collapsed.length <= 180) {
+        return collapsed;
+    }
+    return `${collapsed.slice(0, 177)}...`;
+}
+
+function updatePageMetadata(title, description) {
+    const pageTitle = `${title} - Pleb.One`;
+    document.title = pageTitle;
+
+    setMetaContent('meta[name="description"]', description);
+    setMetaContent('meta[property="og:title"]', title);
+    setMetaContent('meta[property="og:description"]', description);
+    setMetaContent('meta[property="og:url"]', window.location.href);
+    setMetaContent('meta[name="twitter:title"]', title);
+    setMetaContent('meta[name="twitter:description"]', description);
+}
+
+function setMetaContent(selector, value) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.setAttribute('content', value);
+    }
 }
 
 loadPost();

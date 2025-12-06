@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - PlebOne</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=20251111e">
 </head>
 <body>
     <nav class="nav">
         <div class="nav-container">
-            <a href="/" class="nav-logo">PLEBONE</a>
+            <a href="/" class="nav-logo">PLEB.ONE</a>
             <div class="nav-links">
                 <a href="/about.html" class="nav-link">ABOUT</a>
                 <a href="/projects.html" class="nav-link">PROJECTS</a>
@@ -60,6 +60,41 @@
                 </div>
                 <div id="admin-projects-list" class="admin-list">
                     <p class="loading">Loading projects...</p>
+                </div>
+            </div>
+
+            <!-- Tasks Management -->
+            <div class="text-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>PROJECT TASKS</h2>
+                    <div class="task-filter-controls">
+                        <select id="task-project-filter" class="form-select-small">
+                            <option value="">All Projects</option>
+                        </select>
+                        <select id="task-status-filter" class="form-select-small">
+                            <option value="">All Status</option>
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="admin-tasks-list" class="admin-list">
+                    <p class="loading">Loading tasks...</p>
+                </div>
+            </div>
+
+            <!-- Nostr Settings -->
+            <div class="text-section">
+                <h2>NOSTR SETTINGS</h2>
+                <p class="text-muted" style="margin-bottom: 1rem;">Configure Nostr publishing for long-form blog posts (NIP-23). Posts are signed using your Nostr extension (NIP-07).</p>
+
+                <div class="form-group">
+                    <label class="form-label">NOSTR RELAYS</label>
+                    <textarea id="nostr-relays" class="form-textarea" rows="6" placeholder="wss://relay.damus.io&#10;wss://relay.nostr.band&#10;wss://nos.lol"></textarea>
+                    <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.8rem;">One relay URL per line. Posts will be published to all configured relays.</p>
+                    <button id="save-relays-btn" class="btn" style="margin-top: 0.5rem;">SAVE RELAYS</button>
                 </div>
             </div>
         </section>
@@ -138,8 +173,71 @@
         </div>
     </div>
 
+    <!-- Task Modal -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="task-modal-title">EDIT TASK</h2>
+                <button class="modal-close" id="close-task-modal">&times;</button>
+            </div>
+            <form id="task-form">
+                <input type="hidden" id="task-id">
+                <div class="form-group">
+                    <label class="form-label">PROJECT</label>
+                    <input type="text" id="task-project-name" class="form-input" readonly disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">TYPE</label>
+                    <input type="text" id="task-type-display" class="form-input" readonly disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">TITLE</label>
+                    <input type="text" id="task-title" class="form-input" readonly disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">DESCRIPTION</label>
+                    <textarea id="task-description" class="form-textarea" rows="4" readonly disabled></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">AUTHOR</label>
+                    <input type="text" id="task-author" class="form-input" readonly disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">NOSTR EVENT ID</label>
+                    <input type="text" id="task-nostr-event" class="form-input" readonly disabled>
+                </div>
+                <hr style="border-color: var(--border-subtle); margin: 1.5rem 0;">
+                <div class="form-group">
+                    <label class="form-label">STATUS</label>
+                    <select id="task-status" class="form-select">
+                        <option value="open">Open</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ADMIN NOTES</label>
+                    <textarea id="task-admin-notes" class="form-textarea" rows="3" placeholder="Add notes about resolution, progress, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="task-reply-nostr" class="form-checkbox">
+                        <span class="form-label" style="display: inline;">POST UPDATE TO NOSTR</span>
+                    </label>
+                    <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.8rem;">If checked and task has a Nostr event, a reply will be posted with the status update.</p>
+                </div>
+                <div class="admin-actions">
+                    <button type="submit" class="btn">SAVE</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-task-btn">CANCEL</button>
+                    <button type="button" class="btn btn-danger" id="delete-task-btn">DELETE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="footer">
-        <p>PLEBONE - A spin-off from <a href="https://11b.dev" target="_blank" style="color: inherit; text-decoration: underline;">11b.Dev</a> | Open Source | Freedom Tech</p>
+        <p>PLEB.ONE - A spin-off from <a href="https://11b.dev" target="_blank" style="color: inherit; text-decoration: underline;">11b.Dev</a> | Open Source | Freedom Tech | <a href="https://github.com/PlebOne" target="_blank" style="color: inherit; text-decoration: underline;">GitHub</a> | <a href="https://primal.net/PlebOne" target="_blank" style="color: inherit; text-decoration: underline;">Nostr</a></p>
     </footer>
 
     <script type="module" src="/js/admin.js"></script>

@@ -16,13 +16,12 @@ import { AdminModule } from './admin/admin.module';
     TypeOrmModule.forRootAsync({
       useFactory: () => typeOrmConfig,
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      exclude: ['/api*'],
-    }),
     BlogModule,
     ProjectsModule,
     AdminModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
   ],
 })
 export class AppModule {}
