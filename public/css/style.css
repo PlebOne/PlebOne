@@ -254,10 +254,26 @@ a:hover {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     letter-spacing: -0.5px;
     border-bottom: 1px solid var(--border-subtle);
     padding-bottom: 1.5rem;
+}
+
+.rss-link {
+    margin-bottom: 2.5rem;
+    font-size: 0.9rem;
+}
+
+.rss-link a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.rss-link a:hover {
+    color: var(--accent-secondary);
+    text-decoration: underline;
 }
 
 .text-section {
