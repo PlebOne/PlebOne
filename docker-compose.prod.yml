@@ -40,6 +40,8 @@ services:
       - DB_DATABASE=plebone
       - PORT=3000
       - ADMIN_PUBKEYS=${ADMIN_PUBKEYS}
+    volumes:
+      - uploads_data:/app/public/images/uploads
     networks:
       - plebone-network
       - pleb-services
@@ -49,3 +51,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:

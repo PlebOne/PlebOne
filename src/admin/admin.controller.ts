@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { AdminGuard } from './admin.guard';
 import { BlogService } from '../blog/blog.service';
 import { ProjectsService } from '../projects/projects.service';
@@ -77,6 +80,23 @@ export class AdminController {
   async setNostrRelays(@Body() body: { relays: string[] }) {
     await this.settingsService.setRelays(body.relays);
     return { message: 'Nostr relays updated successfully', relays: body.relays };
+  }
+
+  // Image upload endpoint
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './public/images/uploads',
+      filename: (req, file, cb) => {
+        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+        return cb(null, `${randomName}${extname(file.originalname)}`);
+      }
+    })
+  }))
+  uploadFile(@UploadedFile() file) {
+    return {
+      url: `/images/uploads/${file.filename}`
+    };
   }
 
   // Nostr publishing endpoint

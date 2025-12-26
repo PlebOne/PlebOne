@@ -9,6 +9,28 @@ let editingTaskId = null;
 let allTasks = [];
 let allProjects = [];
 
+// Check for existing session on load
+window.addEventListener('load', async () => {
+    const savedAuth = localStorage.getItem('plebone_auth');
+    const savedPubkey = localStorage.getItem('plebone_pubkey');
+    
+    if (savedAuth && savedPubkey) {
+        authToken = savedAuth;
+        currentPubkey = savedPubkey;
+        
+        // Show admin section
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('admin-section').style.display = 'block';
+        document.getElementById('admin-pubkey').textContent = `npub: ${savedPubkey.substring(0, 8)}...`;
+        
+        // Load admin data
+        loadBlogPosts();
+        loadProjects();
+        loadTasks();
+        loadNostrSettings();
+    }
+});
+
 // Check for NIP-07 extension
 function checkNostrExtension() {
     if (!window.nostr) {
@@ -45,6 +67,10 @@ document.getElementById('login-btn').addEventListener('click', async () => {
         // Store the signed event as auth token
         authToken = JSON.stringify(signedEvent);
         
+        // Save to localStorage
+        localStorage.setItem('plebone_auth', authToken);
+        localStorage.setItem('plebone_pubkey', pubkey);
+        
         // Show admin section
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('admin-section').style.display = 'block';
@@ -66,6 +92,8 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 document.getElementById('logout-btn').addEventListener('click', () => {
     authToken = null;
     currentPubkey = null;
+    localStorage.removeItem('plebone_auth');
+    localStorage.removeItem('plebone_pubkey');
     document.getElementById('admin-section').style.display = 'none';
     document.getElementById('login-section').style.display = 'block';
     document.getElementById('login-status').textContent = '';
@@ -77,11 +105,38 @@ async function apiRequest(url, options = {}) {
         throw new Error('Not authenticated');
     }
     
+    // Check if token is expired (older than 4 minutes)
+    try {
+        const event = JSON.parse(authToken);
+        const now = Math.floor(Date.now() / 1000);
+        if (now - event.created_at > 240) { // 4 minutes
+            console.log('Auth token expired, refreshing...');
+            if (window.nostr) {
+                const newEvent = {
+                    kind: 22242,
+                    created_at: now,
+                    tags: [['challenge', 'admin-login']],
+                    content: 'Authenticate to PlebOne admin',
+                    pubkey: currentPubkey
+                };
+                const signedEvent = await window.nostr.signEvent(newEvent);
+                authToken = JSON.stringify(signedEvent);
+                localStorage.setItem('plebone_auth', authToken);
+            }
+        }
+    } catch (e) {
+        console.error('Error checking/refreshing token:', e);
+    }
+    
     const headers = {
-        'Content-Type': 'application/json',
         'Authorization': `Nostr ${authToken}`,
         ...options.headers
     };
+
+    // Don't set Content-Type if body is FormData (for file uploads)
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
     
     const response = await fetch(url, { ...options, headers });
     
@@ -258,6 +313,49 @@ document.getElementById('post-form').addEventListener('submit', async (e) => {
         loadBlogPosts();
     } catch (error) {
         alert('Failed to save post: ' + error.message);
+    }
+});
+
+// Image Upload
+document.getElementById('upload-image-btn').addEventListener('click', () => {
+    document.getElementById('post-image-upload').click();
+});
+
+document.getElementById('post-image-upload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const btn = document.getElementById('upload-image-btn');
+    const originalText = btn.textContent;
+    btn.textContent = 'UPLOADING...';
+    btn.disabled = true;
+    
+    try {
+        const result = await apiRequest('/api/admin/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const textarea = document.getElementById('post-content');
+        const imageMarkdown = `\n![Image description](${result.url})\n`;
+        
+        // Insert at cursor position
+        const startPos = textarea.selectionStart;
+        const endPos = textarea.selectionEnd;
+        textarea.value = textarea.value.substring(0, startPos)
+            + imageMarkdown
+            + textarea.value.substring(endPos, textarea.value.length);
+            
+        // Reset file input
+        e.target.value = '';
+    } catch (error) {
+        alert('Failed to upload image: ' + error.message);
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
     }
 });
 
