@@ -3,6 +3,14 @@
 # should automatically configure Caddy if you're using Caddy Docker Proxy
 
 pleb.one {
+    # NIP-05 verification (MUST BE FIRST)
+    handle /.well-known/nostr.json {
+        reverse_proxy https://relay.pleb.one {
+            header_up Host {upstream_hostport}
+        }
+    }
+
+    # Your existing configuration continues below...
     reverse_proxy plebone-app-prod:3000
     encode gzip
     
