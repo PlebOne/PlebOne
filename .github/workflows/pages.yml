@@ -2,7 +2,8 @@ name: Deploy site to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    # plebone-pages-site is for the pre-merge preview only; remove it before merging.
+    branches: [main, plebone-pages-site]
     paths:
       - "site/**"
       - ".github/workflows/pages.yml"
