@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PlebOne – Open-source Nostr tools</title>
+  <meta name="description" content="PlebOne is a small home for open-source Nostr tools, and the community relay at relay.pleb.one.">
+  <link rel="canonical" href="https://pleb.one/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PlebOne">
+  <meta property="og:url" content="https://pleb.one/">
+  <meta property="og:title" content="PlebOne – Open-source Nostr tools">
+  <meta property="og:description" content="PlebOne is a small home for open-source Nostr tools, and the community relay at relay.pleb.one.">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css">
+  <script>window.goatcounter={path:function(p){return location.host+p}}</script>
+  <script data-goatcounter="https://goatcounter-production-af4b.up.railway.app/count" async src="https://goatcounter-production-af4b.up.railway.app/count.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l5 5-5 5"/><path d="M14 19h9"/></svg></span>
+        PlebOne
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="./" aria-current="page">Home</a></li>
+          <li><a href="#relay">Relay</a></li>
+          <li><a href="projects.html">Projects</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section aria-labelledby="intro-title">
+      <p class="eyebrow">PlebOne</p>
+      <h1 id="intro-title">A small home for open-source Nostr tools</h1>
+      <p class="lede">PlebOne builds open-source tools for the Nostr protocol and runs a community relay.</p>
+      <p>We build tools that respect user privacy, resist censorship, and promote open standards. We're not here to chase hype, just to build solid, useful tools. Everything we make is on <a href="https://github.com/PlebOne">GitHub</a>.</p>
+      <p><a href="projects.html">See the projects</a></p>
+    </section>
+
+    <section id="relay" aria-labelledby="relay-title">
+      <p class="eyebrow">The relay</p>
+      <h2 id="relay-title">relay.pleb.one</h2>
+      <div class="panel">
+        <p>A community Nostr relay, run in the open. Only members on the relay's whitelist can publish to it, and invites are reviewed by people, not bots.</p>
+        <p>Relay address: <code>wss://relay.pleb.one</code></p>
+      </div>
+      <h3>How to connect</h3>
+      <ol class="steps">
+        <li>Request an invite at <a href="https://relay.pleb.one/request">relay.pleb.one/request</a>. Share your npub and a short note about how you use Nostr.</li>
+        <li>Someone from the admin team reviews it and replies by Nostr DM.</li>
+        <li>Once you're in, add <code>wss://relay.pleb.one</code> to the relay list in your Nostr client.</li>
+      </ol>
+      <p>Members can sign in at <a href="https://relay.pleb.one">relay.pleb.one</a> and invite friends from their dashboard. The relay's code is open source at <a href="https://github.com/PlebOne/relay.pleb.one">PlebOne/relay.pleb.one</a>.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>A <a href="https://ninepointlabs.com">Nine Point Labs</a> project</p>
+      <p><a href="https://github.com/PlebOne">PlebOne on GitHub</a></p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects – PlebOne</title>
+  <meta name="description" content="Open-source Nostr tools from PlebOne: a community relay, a Linux signer, a terminal client, and RSS and Nostr feed readers.">
+  <link rel="canonical" href="https://pleb.one/projects.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PlebOne">
+  <meta property="og:url" content="https://pleb.one/projects.html">
+  <meta property="og:title" content="Projects – PlebOne">
+  <meta property="og:description" content="Open-source Nostr tools from PlebOne: a community relay, a Linux signer, a terminal client, and RSS and Nostr feed readers.">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css">
+  <script>window.goatcounter={path:function(p){return location.host+p}}</script>
+  <script data-goatcounter="https://goatcounter-production-af4b.up.railway.app/count" async src="https://goatcounter-production-af4b.up.railway.app/count.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l5 5-5 5"/><path d="M14 19h9"/></svg></span>
+        PlebOne
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="./">Home</a></li>
+          <li><a href="./#relay">Relay</a></li>
+          <li><a href="projects.html" aria-current="page">Projects</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <p class="eyebrow">Projects</p>
+    <h1>Open-source Nostr tools</h1>
+    <p class="lede">Everything here is open source. Each project lives in its own repository, where you can read the code, file issues, and send changes.</p>
+
+    <ul class="projects">
+      <li class="panel">
+        <h2>relay.pleb.one</h2>
+        <p>A public Nostr relay with whitelist-based access. A Rust relay server does the work, and a Next.js site handles whitelist management and invites. Runs with Docker Compose.</p>
+        <p class="repo"><a href="https://github.com/PlebOne/relay.pleb.one">PlebOne/relay.pleb.one</a></p>
+      </li>
+      <li class="panel">
+        <h2>Pleb Signer</h2>
+        <p>A NIP-55 compatible Nostr signer for Linux, similar to Amber for Android. It runs in the system tray, keeps your keys encrypted at rest, and lets other apps ask for signatures over D-Bus, with your approval.</p>
+        <p class="repo"><a href="https://github.com/PlebOne/Pleb_Signer">PlebOne/Pleb_Signer</a></p>
+      </li>
+      <li class="panel">
+        <h2>Noscli</h2>
+        <p>A command-line Nostr client built with Go and Charm tools (Bubble Tea, Lip Gloss). Sign in with Pleb Signer or an nsec, then read your feed, post, reply, follow threads, and send encrypted DMs from the terminal.</p>
+        <p class="repo"><a href="https://github.com/PlebOne/Noscli">PlebOne/Noscli</a></p>
+      </li>
+      <li class="panel">
+        <h2>Nostr-Feedz</h2>
+        <p>A Google Reader-style feed aggregator for the web. It brings RSS feeds and Nostr long-form content (NIP-23) together in one three-panel reader.</p>
+        <p class="repo"><a href="https://github.com/PlebOne/Nostr-Feedz">PlebOne/Nostr-Feedz</a></p>
+      </li>
+      <li class="panel">
+        <h2>NostrFeedz CLI</h2>
+        <p>A command-line companion to Nostr-Feedz for reading RSS feeds and Nostr long-form content. Subscriptions and read status sync across devices through Nostr, and a local database keeps reading available offline.</p>
+        <p class="repo"><a href="https://github.com/PlebOne/NostrFeedz-cli">PlebOne/NostrFeedz-cli</a></p>
+      </li>
+    </ul>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>A <a href="https://ninepointlabs.com">Nine Point Labs</a> project</p>
+      <p><a href="https://github.com/PlebOne">PlebOne on GitHub</a></p>
+    </div>
+  </footer>
+</body>
+</html>
